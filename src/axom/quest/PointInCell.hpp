@@ -210,26 +210,28 @@ public:
 
   void locatePoints(axom::ArrayView<const Point2DType> pts,
                     IndexType* outCellIds,
-                    Point2DType* outIsopar = nullptr)
+                    Point2DType* outIsopar = nullptr,
+                    bool returnMax = false) const
   {
     SLIC_ASSERT(pts.size() > 0);
     SLIC_ASSERT(pts.data() != nullptr);
     SLIC_ASSERT(outCellIds != nullptr);
     SLIC_ASSERT(m_pointFinder2D != nullptr);
 
-    m_pointFinder2D->locatePoints(pts, outCellIds, outIsopar);
+    m_pointFinder2D->locatePoints(pts, outCellIds, outIsopar, returnMax);
   }
 
   void locatePoints(axom::ArrayView<const Point3DType> pts,
                     IndexType* outCellIds,
-                    Point3DType* outIsopar = nullptr) const
+                    Point3DType* outIsopar = nullptr,
+                    bool returnMax = false) const
   {
     SLIC_ASSERT(pts.size() > 0);
     SLIC_ASSERT(pts.data() != nullptr);
     SLIC_ASSERT(outCellIds != nullptr);
     SLIC_ASSERT(m_pointFinder3D != nullptr);
 
-    m_pointFinder3D->locatePoints(pts, outCellIds, outIsopar);
+    m_pointFinder3D->locatePoints(pts, outCellIds, outIsopar, returnMax);
   }
 
   /*!

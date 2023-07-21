@@ -151,7 +151,8 @@ public:
 
   void locatePoints(axom::ArrayView<const SpacePoint> pts,
                     IndexType* outCellIds,
-                    SpacePoint* outIsoparametricCoords) const
+                    SpacePoint* outIsoparametricCoords,
+                    bool returnMax = false) const
   {
     using IndexArray = axom::Array<IndexType>;
 
@@ -283,6 +284,7 @@ public:
       npts,
       AXOM_HOST_LAMBDA(IndexType i) {
         outCellIdsPtr[i] = PointInCellTraits<mesh_tag>::NO_CELL;
+        IndexType maxCellId = PointInCellTraits<mesh_tag>::NO_CELL;
         SpacePoint pt = ptsHostPtr[i];
         SpacePoint isopar;
         for(int icell = 0; icell < countsHostPtr[i]; icell++)
@@ -291,10 +293,24 @@ public:
           // if isopar is in the proper range
           if(m_meshWrapper->locatePointInCell(cellIdx, pt.data(), isopar.data()))
           {
-            // then we have found the cellID
-            outCellIdsPtr[i] = cellIdx;
-            break;
+            // if we have found the candidateIdx then check bool
+            if (returnMax)
+            {
+              // keep going until all cellIdx are found
+              // and return the max cellIdx for the point
+              maxCellId = std::max(maxCellId, cellIdx);
+            }
+            else
+            { // exit with first valid cellIdx point found
+              outCellIdsPtr[i] = cellIdx;
+              break;
+            }
           }
+        }
+        if(returnMax)
+        {
+          // assign max cell index to outCellIdsPtr
+          outCellIdsPtr[i] = maxCellId;
         }
         if(outIsoparametricCoords != nullptr)
         {
@@ -325,12 +341,28 @@ public:
                                               pt.data(),
                                               isopar.data()))
           {
-            outCellIds[i] = candidateIdx;
-            return true;
+            // if we have found the candidateIdx then check bool
+            if (returnMax)
+            {
+              // Keep going until all candidateIdx are found
+              // and return the max candidateIdx for the point
+              maxCellId = std::max(maxCellId, candidateIdx);
+            }
+            else
+            { // Exit with the first valid candidateIdx point found
+              outCellIds[i] = candidateIdx;
+              return true;
+            }
           }
         }
         return false;
       });
+      
+      if (returnMax)
+      {
+        // Assign max cell index to outCellIds for each point
+        outCellIds[i] = maxCellId;
+      }
       if(outIsoparametricCoords != nullptr)
       {
         outIsoparametricCoords[i] = isopar;

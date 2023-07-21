@@ -329,6 +329,7 @@ public:
                  outIsoparHost.size() * sizeof(SpacePoint));
     }
 #else   // AXOM_USE_RAJA
+    IndexType maxCellId = PointInCellTraits<mesh_tag>::NO_CELL;
     for(int i = 0; i < npts; i++)
     {
       SpacePoint pt = pts[i];
